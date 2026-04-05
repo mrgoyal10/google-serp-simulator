@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MR. Goyal Tools — Google SERP Simulator</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{min-height:100vh;background:linear-gradient(160deg,#0a0f0d 0%,#0d1a14 30%,#0a1210 60%,#080e0b 100%);
+font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;color:#e8f5e9;padding:20px}
+body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%;
+background:radial-gradient(circle at 30% 20%,rgba(0,230,118,0.04),transparent 50%),
+radial-gradient(circle at 70% 80%,rgba(0,200,83,0.03),transparent 50%);pointer-events:none}
+
+.brand{text-align:center;margin-bottom:32px}
+.brand h1{font-size:1.5rem;font-weight:800;letter-spacing:1px;text-shadow:0 0 30px rgba(0,230,118,0.15)}
+.brand h1 span{color:#00e676}
+.brand p{font-size:0.72rem;color:#5a7d6a;margin-top:3px;letter-spacing:3px;text-transform:uppercase}
+
+.main{max-width:960px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:24px}
+@media(max-width:768px){.main{grid-template-columns:1fr}}
+
+.panel{background:rgba(18,30,24,0.85);backdrop-filter:blur(30px);
+border:1px solid rgba(0,230,118,0.1);border-radius:20px;padding:24px;
+box-shadow:0 30px 80px rgba(0,0,0,0.5)}
+
+.panel-title{font-size:0.85rem;font-weight:700;color:#00e676;margin-bottom:18px;
+display:flex;align-items:center;gap:8px;letter-spacing:0.5px;text-transform:uppercase}
+
+.field{margin-bottom:14px}
+.field label{display:block;font-size:0.78rem;color:#5a7d6a;margin-bottom:6px;font-weight:600;letter-spacing:0.3px}
+.field input,.field textarea{width:100%;padding:11px 14px;background:rgba(0,0,0,0.35);
+border:1px solid rgba(0,230,118,0.08);border-radius:10px;color:#e8f5e9;
+font-family:inherit;font-size:0.9rem;outline:none;transition:border-color 0.2s;resize:none}
+.field input:focus,.field textarea:focus{border-color:rgba(0,230,118,0.4)}
+.field input::placeholder,.field textarea::placeholder{color:#3a5c4a}
+.field .hint{font-size:0.68rem;color:#3a5c4a;margin-top:4px}
+
+.char-count{font-size:0.68rem;color:#5a7d6a;text-align:right;margin-top:3px}
+.char-count.warn{color:#ffab40}
+.char-count.danger{color:#ff5252}
+
+.fetch-row{display:flex;gap:10px;margin-bottom:18px}
+.fetch-row input{flex:1;padding:11px 14px;background:rgba(0,0,0,0.35);
+border:1px solid rgba(0,230,118,0.08);border-radius:10px;color:#e8f5e9;
+font-family:inherit;font-size:0.88rem;outline:none;transition:border-color 0.2s}
+.fetch-row input:focus{border-color:rgba(0,230,118,0.4)}
+.fetch-row input::placeholder{color:#3a5c4a}
+
+.btn-fetch{padding:11px 20px;background:rgba(64,196,255,0.12);border:1px solid rgba(64,196,255,0.2);
+border-radius:10px;color:#40c4ff;font-weight:700;cursor:pointer;font-family:inherit;
+font-size:0.85rem;transition:all 0.2s;white-space:nowrap}
+.btn-fetch:hover{background:rgba(64,196,255,0.22)}
+.btn-fetch:disabled{opacity:0.5;cursor:not-allowed}
+
+.divider{height:1px;background:rgba(0,230,118,0.08);margin:18px 0}
+.divider span{display:block;text-align:center;font-size:0.7rem;color:#3a5c4a;
+background:rgba(18,30,24,0.85);width:fit-content;margin:-9px auto 0;padding:0 10px;position:relative}
+
+/* Google SERP Preview */
+.serp-wrap{background:#1a1a2e;border-radius:16px;padding:20px 24px;
+border:1px solid rgba(255,255,255,0.05)}
+.serp-header{display:flex;align-items:center;gap:12px;margin-bottom:18px;padding-bottom:14px;
+border-bottom:1px solid rgba(255,255,255,0.05)}
+.serp-logo{display:flex;align-items:center;gap:2px}
+.serp-logo span{font-size:1.3rem;font-weight:800}
+.serp-logo .g1{color:#4285f4}.serp-logo .o1{color:#ea4335}
+.serp-logo .o2{color:#fbbc05}.serp-logo .g2{color:#4285f4}
+.serp-logo .l1{color:#34a853}.serp-logo .e1{color:#ea4335}
+.serp-search{flex:1;max-width:400px;height:38px;background:#202124;border-radius:20px;
+border:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;padding:0 14px}
+.serp-search i{color:#5f6368;font-size:0.85rem;margin-right:10px}
+.serp-search span{color:#5f6368;font-size:0.85rem}
+
+.serp-result{max-width:600px}
+.serp-url{font-size:0.78rem;color:#bdc1c6;margin-bottom:4px;display:flex;align-items:center;gap:6px}
+.serp-url img{width:18px;height:18px;border-radius:50%;background:#202124}
+.serp-favicon{width:16px;height:16px;border-radius:50%;background:#303134;
+display:flex;align-items:center;justify-content:center;font-size:0.55rem;color:#9aa0a6;flex-shrink:0}
+.serp-title{font-size:1.25rem;color:#8ab4f8;cursor:pointer;line-height:1.3;
+margin-bottom:6px;display:inline-block;text-decoration:none;word-break:break-word}
+.serp-title:hover{text-decoration:underline}
+.serp-desc{font-size:0.88rem;color:#bdc1c6;line-height:1.58;word-break:break-word}
+.serp-desc b{color:#e8eaed;font-weight:700}
+
+.serp-empty{text-align:center;padding:50px 20px;color:#3a5c4a}
+.serp-empty i{font-size:2.5rem;margin-bottom:12px;display:block;opacity:0.3}
+.serp-empty p{font-size:0.88rem}
+
+.loading{text-align:center;padding:40px;color:#5a7d6a}
+.loading i{font-size:1.5rem;animation:spin 1s linear infinite;margin-bottom:8px;display:block}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.error-msg{background:rgba(255,82,82,0.08);border:1px solid rgba(255,82,82,0.15);
+border-radius:10px;padding:10px 14px;font-size:0.82rem;color:#ff5252;margin-bottom:14px;
+display:none;align-items:center;gap:8px}
+.error-msg.show{display:flex}
+
+.footer{text-align:center;margin-top:28px;font-size:0.7rem;color:#3a5c4a;letter-spacing:1px}
+
+.tab-row{display:flex;gap:4px;margin-bottom:18px;background:rgba(0,0,0,0.2);border-radius:10px;padding:3px}
+.tab-btn{flex:1;padding:8px;border:none;border-radius:8px;background:none;
+color:#5a7d6a;font-family:inherit;font-size:0.78rem;font-weight:600;cursor:pointer;transition:all 0.2s}
+.tab-btn.active{background:rgba(0,230,118,0.12);color:#00e676}
+</style>
+</head>
+<body>
+
+<div class="brand">
+<h1><span>MR. Goyal</span> Tools</h1>
+<p>Google SERP Simulator</p>
+</div>
+
+<div class="main">
+<!-- Left: Inputs -->
+<div class="panel">
+<div class="panel-title"><i class="fas fa-sliders"></i> Input</div>
+
+<div class="error-msg" id="errorMsg"><i class="fas fa-circle-exclamation"></i><span id="errorText"></span></div>
+
+<div class="tab-row">
+<button class="tab-btn active" id="tabUrl" onclick="switchTab('url')"><i class="fas fa-link" style="margin-right:4px"></i> URL Fetch</button>
+<button class="tab-btn" id="tabManual" onclick="switchTab('manual')"><i class="fas fa-pen" style="margin-right:4px"></i> Manual</button>
+</div>
+
+<div id="urlPanel">
+<div class="fetch-row">
+<input type="text" id="fetchUrl" placeholder="https://example.com" onkeydown="if(event.key==='Enter')fetchData()">
+<button class="btn-fetch" id="fetchBtn" onclick="fetchData()"><i class="fas fa-download" style="margin-right:5px"></i>Fetch</button>
+</div>
+<div class="divider"><span>ya neeche manually bhi daal sakte ho</span></div>
+</div>
+
+<div id="manualPanel" style="display:none"></div>
+
+<div class="field">
+<label>Page Title</label>
+<input type="text" id="titleInput" placeholder="Example: Best Online Calculator — Free & Fast" oninput="updatePreview()">
+<div class="char-count" id="titleCount">0 / 60</div>
+</div>
+
+<div class="field">
+<label>Meta Description</label>
+<textarea id="descInput" rows="3" placeholder="Example: Free online calculator for basic math operations. Fast, easy, no signup required." oninput="updatePreview()"></textarea>
+<div class="char-count" id="descCount">0 / 160</div>
+</div>
+
+<div class="field">
+<label>Page URL</label>
+<input type="text" id="urlInput" placeholder="https://example.com/page" oninput="updatePreview()">
+</div>
+</div>
+
+<!-- Right: Preview -->
+<div class="panel">
+<div class="panel-title"><i class="fas fa-eye"></i> Google Preview</div>
+
+<div class="serp-wrap">
+<div class="serp-header">
+<div class="serp-logo">
+<span class="g1">G</span><span class="o1">o</span><span class="o2">o</span><span class="g2">g</span><span class="l1">l</span><span class="e1">e</span>
+</div>
+<div class="serp-search"><i class="fas fa-search"></i><span id="searchTerm">search query...</span></div>
+</div>
+
+<div id="serpArea">
+<div class="serp-empty">
+<i class="fas fa-search"></i>
+<p>Title ya description daalo —<br>preview yahan dikhega</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="footer">MR. Goyal Tools &copy; 2025</div>
+
+<script>
+const titleInput=document.getElementById('titleInput'),
+descInput=document.getElementById('descInput'),
+urlInput=document.getElementById('urlInput'),
+fetchUrl=document.getElementById('fetchUrl'),
+serpArea=document.getElementById('serpArea'),
+titleCount=document.getElementById('titleCount'),
+descCount=document.getElementById('descCount'),
+errorMsg=document.getElementById('errorMsg'),
+errorText=document.getElementById('errorText'),
+searchTerm=document.getElementById('searchTerm');
+
+function switchTab(tab){
+document.getElementById('tabUrl').classList.toggle('active',tab==='url');
+document.getElementById('tabManual').classList.toggle('active',tab==='manual');
+document.getElementById('urlPanel').style.display=tab==='url'?'block':'none';
+document.getElementById('manualPanel').style.display=tab==='manual'?'block':'none';
+}
+
+function showError(msg){errorText.textContent=msg;errorMsg.classList.add('show');setTimeout(()=>errorMsg.classList.remove('show'),5000);}
+function hideError(){errorMsg.classList.remove('show');}
+
+function getDomain(url){
+try{let u=new URL(url);return u.hostname.replace('www.','');}catch(e){return url;}
+}
+function getFaviconUrl(url){
+try{let u=new URL(url);return 'https://www.google.com/s2/favicons?domain='+u.hostname+'&sz=32';}catch(e){return '';}
+}
+function getPath(url){
+try{let u=new URL(url);let p=u.pathname;if(p==='/')p='';return u.hostname+p;}catch(e){return url;}
+}
+
+function updatePreview(){
+const title=titleInput.value.trim();
+const desc=descInput.value.trim();
+const url=urlInput.value.trim();
+
+const tLen=title.length;
+const dLen=desc.length;
+
+titleCount.textContent=tLen+' / 60';
+titleCount.className='char-count'+(tLen>60?' danger':tLen>50?' warn':'');
+
+descCount.textContent=dLen+' / 160';
+descCount.className='char-count'+(dLen>160?' danger':dLen>140?' warn':'');
+
+if(!title&&!desc){
+serpArea.innerHTML='<div class="serp-empty"><i class="fas fa-search"></i><p>Title ya description daalo —<br>preview yahan dikhega</p></div>';
+return;
+}
+
+const domain=getDomain(url);
+const path=getPath(url);
+const favicon=getFaviconUrl(url);
+const cleanTitle=title||'Page Title';
+const cleanDesc=desc||'Meta description yahan dikhegi. Google search results mein aise dikhta hai.';
+
+if(title)searchTerm.textContent=title.split(' ')[0].toLowerCase()+'...';
+
+serpArea.innerHTML=`
+<div class="serp-result">
+<div class="serp-url">
+<img src="${favicon}" onerror="this.style.display='none'" alt="">
+<span>${domain}${path!==domain?' › '+url:'  '}</span>
+</div>
+<a class="serp-title" href="javascript:void(0)">${cleanTitle}</a>
+<div class="serp-desc">${cleanDesc}</div>
+</div>`;
+}
+
+async function fetchData(){
+let url=fetchUrl.value.trim();
+if(!url){showError('Pehle URL daalo!');return;}
+if(!url.startsWith('http'))url='https://'+url;
+fetchUrl.value=url;
+hideError();
+
+const btn=document.getElementById('fetchBtn');
+btn.disabled=true;
+btn.innerHTML='<i class="fas fa-spinner fa-spin" style="margin-right:5px"></i>Fetching...';
+
+serpArea.innerHTML='<div class="loading"><i class="fas fa-spinner fa-spin"></i><p>URL fetch ho rahi hai...</p></div>';
+
+try{
+const res=await fetch('https://api.allorigins.win/raw?url='+encodeURIComponent(url));
+if(!res.ok)throw new Error('HTTP '+res.status);
+const html=await res.text();
+
+const parser=new DOMParser();
+const doc=parser.parseFromString(html,'text/html');
+
+let title=doc.querySelector('title')?.textContent?.trim()||'';
+let desc=doc.querySelector('meta[name="description"]')?.getAttribute('content')?.trim()
+||doc.querySelector('meta[property="og:description"]')?.getAttribute('content')?.trim()||'';
+
+if(!title&&!desc)throw new Error('Is page se title ya description nahi mila. Shayad ye page dynamically load hota hai.');
+
+titleInput.value=title;
+descInput.value=desc;
+urlInput.value=url;
+updatePreview();
+showError('');
+}catch(e){
+serpArea.innerHTML='<div class="serp-empty"><i class="fas fa-circle-exclamation"></i><p>Fetch nahi ho paya —<br>manually daal ke dekho</p></div>';
+showError(e.message||'Kuch gadbad ho gayi. URL check karo ya manually daalo.');
+}
+
+btn.disabled=false;
+btn.innerHTML='<i class="fas fa-download" style="margin-right:5px"></i>Fetch';
+}
+</script>
+</body>
+</html>
